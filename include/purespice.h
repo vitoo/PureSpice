@@ -293,6 +293,8 @@ bool purespice_clipboardData(PSDataType type, uint8_t * data, size_t size);
 
 bool purespice_writeAudio(void * data, size_t size, uint32_t time);
 
+bool purespice_monitorConfig(int width, int height);
+
 #ifdef __cplusplus
 }
 #endif

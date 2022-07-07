@@ -38,6 +38,8 @@ Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include <spice/vd_agent.h>
 
+#include "debug.h"
+
 typedef struct PSAgent PSAgent;
 
 struct PSAgent
@@ -435,6 +437,53 @@ static PSDataType agentTypeToPSType(uint32_t type)
       return SPICE_DATA_NONE;
   }
 }
+
+bool purespice_monitorConfig(int width, int height)
+{
+    DEBUG_INFO("SPICE AGENT MONITOR CONFIG");
+    if (!agent_present())
+    {
+        DEBUG_INFO("SPICE AGENT Not connected");
+        return false;
+    }
+
+    DEBUG_INFO("SPICE AGENT try to changed monitor config to %dx%d", width, height);
+    // if (spice.cbMonitorConfig)
+    // {
+        // const ssize_t monitorSize1 = sizeof(VDAgentMonitorsConfig) + sizeof(VDAgentMonConfig);
+        //
+
+        // const ssize_t monitorSize = sizeof(VDAgentMonitorsConfig) + sizeof(VDAgentMonConfig);
+        // uint8_t tmpBuf[monitorSize];
+        // VDAgentMonitorsConfig* reqMonitor = (VDAgentMonitorsConfig*)tmpBuf;
+
+        _VDAgentMonitorsConfig reqMonitor;
+        const ssize_t monitorSize = sizeof(_VDAgentMonitorsConfig);
+        reqMonitor.num_of_monitors = 1;
+        reqMonitor.flags = 1;
+        reqMonitor.width = width;
+        reqMonitor.height = height;
+        reqMonitor.depth = 32;
+        reqMonitor.x = 0;
+        reqMonitor.y = 0;
+
+        if (!agent_startMsg(VD_AGENT_MONITORS_CONFIG, monitorSize) ||
+            !agent_writeMsg(&reqMonitor, monitorSize))
+        {
+            DEBUG_INFO("SPICE AGENT Cannot send command to change monitor");
+            return false;
+        }
+        DEBUG_INFO("SPICE AGENT Sucessfully changed monitor config to %dx%d", width, height);
+    // }
+    // else
+    // {
+    //     DEBUG_INFO("SPICE AGENT No caps for monitor config");
+    //     return false;
+    // }
+    DEBUG_INFO("SPICE AGENT monitor config changer without error");
+    return true;
+}
+
 
 bool purespice_clipboardRequest(PSDataType type)
 {
